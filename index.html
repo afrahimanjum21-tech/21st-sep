@@ -1318,7 +1318,7 @@ class WishScene {
     /* keyboard path: space/enter holds the flame */
     this.cv.setAttribute("tabindex", "0");
     this.cv.setAttribute("role", "button");
-    this.cv.setAttribute("aria-label", "Press and hold to make a wish on the candle");
+    this.cv.setAttribute("aria-label", "");
     this.cv.addEventListener("keydown", e => {
       if ((e.key === " " || e.key === "Enter") && this.phase === "idle") { e.preventDefault(); this.held = true; this.setPhase("holding"); }
     });
