@@ -41,7 +41,7 @@
      ========================================================================= */
   #stage{
     position:fixed;inset:0;width:100%;height:100vh;height:100dvh;
-    overflow:hidden;touch-action:none;
+    overflow:hidden;touch-action:pan-y;
   }
   .scene{
     position:absolute;inset:0;overflow:hidden;
@@ -71,20 +71,25 @@
   /* ---------------- page copy ---------------- */
   .copy{
     position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;text-align:center;
-    gap:clamp(12px,2.4vh,20px);
-    padding:calc(env(safe-area-inset-top,0px) + 11vh) clamp(22px,7vw,34px) calc(env(safe-area-inset-bottom,0px) + 84px);
-    pointer-events:none;
+    gap:clamp(7px,1.6vh,12px);
+    padding:calc(env(safe-area-inset-top,0px) + 8vh) clamp(20px,6vw,32px) calc(env(safe-area-inset-bottom,0px) + 72px);
+    pointer-events:auto;overflow-y:auto;overflow-x:hidden;
+    touch-action:pan-y;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent;
   }
-  .title{font-family:var(--display);font-weight:600;line-height:1.12;margin:0;letter-spacing:.005em;color:var(--ink-2)}
+  .copy::-webkit-scrollbar{width:3px}
+  .copy::-webkit-scrollbar-track{background:transparent}
+  .copy::-webkit-scrollbar-thumb{background:rgba(255,255,255,.25);border-radius:3px}
+  .title{font-family:var(--display);font-weight:600;line-height:1.12;margin:0;letter-spacing:.005em;color:var(--ink-2);text-shadow:0 2px 16px rgba(0,0,0,.78),0 0 36px rgba(0,0,0,.6)}
   .t-xl{font-size:clamp(42px,12.6vw,64px)}
   .t-lg{font-size:clamp(34px,10.4vw,54px)}
-  .caps{font-family:var(--display);font-weight:600;letter-spacing:.08em;font-size:clamp(28px,8.6vw,44px);line-height:1.34;margin:0;color:var(--ink-2)}
-  .msg{font-family:var(--body);font-size:clamp(16px,4.4vw,18px);line-height:1.8;max-width:30ch;margin:0;letter-spacing:.005em;font-weight:300;color:var(--ink-3)}
-  .tiny{font-family:var(--body);font-weight:300;font-size:clamp(12.5px,3.4vw,14px);letter-spacing:.08em;opacity:.72;margin:0;color:var(--ink-3)}
+  .caps{font-family:var(--display);font-weight:600;letter-spacing:.08em;font-size:clamp(28px,8.6vw,44px);line-height:1.34;margin:0;color:var(--ink-2);text-shadow:0 2px 16px rgba(0,0,0,.78),0 0 36px rgba(0,0,0,.6)}
+  .msg{font-family:var(--body);font-size:clamp(14px,3.9vw,16.5px);line-height:1.65;max-width:32ch;margin:0;letter-spacing:.005em;font-weight:300;color:var(--ink-3);text-shadow:0 1px 10px rgba(0,0,0,.65),0 0 28px rgba(0,0,0,.45)}
+  .tiny{font-family:var(--body);font-weight:300;font-size:clamp(12.5px,3.4vw,14px);letter-spacing:.08em;opacity:.72;margin:0;color:var(--ink-3);text-shadow:0 1px 8px rgba(0,0,0,.62)}
   /* readability scrim behind text on the busier pages — a soft gradient, never a box */
   .scrim{position:absolute;inset:0;pointer-events:none}
-  .scrim.light{background:linear-gradient(180deg,rgba(8,14,32,.55) 0%,rgba(8,14,32,.22) 38%,rgba(8,14,32,0) 64%)}
-  .scrim.deep{background:linear-gradient(180deg,rgba(4,8,20,.62) 0%,rgba(4,8,20,.26) 42%,rgba(4,8,20,0) 68%)}
+  .scrim.light{background:linear-gradient(180deg,rgba(8,14,32,.78) 0%,rgba(8,14,32,.48) 48%,rgba(8,14,32,.18) 76%,rgba(8,14,32,0) 100%)}
+  .scrim.deep{background:linear-gradient(180deg,rgba(4,8,20,.88) 0%,rgba(4,8,20,.58) 52%,rgba(4,8,20,.24) 80%,rgba(4,8,20,0) 100%)}
 
   /* staged reveal: nothing pops in, everything arrives */
   .copy > *{opacity:0;transform:translateY(12px);filter:blur(6px)}
@@ -183,7 +188,7 @@
   letter-spacing:.005em;
   text-shadow:0 2px 12px rgba(0,0,0,.45);
 }
-  .msg.light{color:#ffffff;text-shadow:0 2px 18px rgba(0,0,0,.62)}
+  .msg.light{color:#ffffff;text-shadow:0 2px 20px rgba(0,0,0,.92),0 0 44px rgba(0,0,0,.78),0 1px 4px rgba(0,0,0,.98)}
 
   /* ---------------- cake prompts ---------------- */
   #cakeCv{touch-action:none}
@@ -762,8 +767,8 @@ const BGM = (() => {
   const IDS = { opening: "music1", celebration: "music2", cake: "music3" };
   const VOL = { opening: 0.70, celebration: 0.80, cake: 0.75 };
   const SYNTH = { opening: "garden", celebration: "night", cake: "cake" };
-  const OUT_MS = 260;    // old song fades down over this, then pauses
-  const IN_MS = 420;     // new song fades up over this
+  const OUT_MS = 1400;   // old song fades down over this, then pauses
+  const IN_MS = 1000;    // new song fades up over this
 
   const el = {}, dead = {};
   let want = null, playing = null, gen = 0;
@@ -862,8 +867,8 @@ const BGM = (() => {
       const prev = playing && el[playing] ? el[playing] : null;
       playing = null;
       fileMode = false;
-      if (prev) fadeTo(prev, 0, OUT_MS, () => hardStop(prev));
-      synth(key);
+      if (prev) fadeTo(prev, 0, OUT_MS, () => { hardStop(prev); synth(key); });
+      else synth(key);
       return;
     }
     start(key);
@@ -1868,9 +1873,9 @@ class CelebrationScene {
       release: [7.0 * k, 8.5 * k],
       firstShell: 8.2 * k,
       climax: [9.0 * k, 14.0 * k],
-      calm: 14.5 * k,
-      hold: 16.0 * k,
-      end: 17.5 * k
+      calm: 22.0 * k,
+      hold: 25.5 * k,
+      end: 30.0 * k
     };
   }
 
@@ -6021,7 +6026,7 @@ that make you smile, all over again.
     <p class="tiny" style="color:#cbd5e1">\u2764\uFE0F \u2022 \u{1F338} \u2022 \u2764\uFE0F</p>`
   },
   {
-    bg: scene3, key: "wish", wish: true, scrim: "deep", tint: "#E2E8F0", accent: "#CBD5E1",
+    bg: scene3, key: "wish", scrim: "deep", tint: "#E2E8F0", accent: "#CBD5E1",
     html: `<h1 class="title t-lg" style="color:#e2e8f0;text-shadow:0 2px 16px rgba(0,0,0,.6)">take your time</h1>
     <p class="msg light">There’s still so much life left to live,<br>
 so many places left to see.<br><br>
@@ -6080,7 +6085,6 @@ and ami tomar dike takai beraitechilam....🙂<br><br>
 ei kichudin agei shob hoilo mone hoi🙂<br><br>
 
 (ki bola uchit bujhchilam na asole... tai eshob kishob kishob jani likhe dichi. anyway happy birthday. beshi kichu likhte pari nai. tomake aar raagate chai na. last line tao onek bhoye likhchi...........)</p>
-    <p class="tiny" style="color:#cbd5e1">with all my heart \u{1F495}</p>
     <p class="tiny swipe-cue" style="color:#003bd1;opacity:1">jai hok, swipe for the celebration \u203A\u203A</p>`
   }
 ];
@@ -6203,7 +6207,9 @@ SLIDES.forEach((s, i) => {
 });
 
 /* the wish candle lives on page 3 and hands off to the celebration */
-wish = new WishScene(document.getElementById("wishCv"), {
+const _wishCvEl = document.getElementById("wishCv");
+if (_wishCvEl) {
+wish = new WishScene(_wishCvEl, {
   onPhase: p => {
     const hint = document.getElementById("wishHint");
     const ring = document.getElementById("wishRing");
@@ -6222,6 +6228,7 @@ wish = new WishScene(document.getElementById("wishCv"), {
     D.wishComplete();
   }
 });
+}
 
 /* ===================== STATE MACHINE ===================== */
 const ST = {
@@ -6426,12 +6433,12 @@ const Director = {
     // the cake is already built; bring it forward immediately
     cakeEl.classList.add("warm");
     cake.start();
-    this.show(cakeEl, 950);
-    this.hide(celEl, 950);
+    this.show(cakeEl, 2400);
+    this.hide(celEl, 2400);
     this.markDots(6);
 
     // one warm light crosses the cut so there is never an empty frame
-    bridge.carry(from, to, 0.95, () => {
+    bridge.carry(from, to, 0.55, () => {
       bridge.clear();
       this.set(ST.CAKE);
       this.lock = false;               // cake interactions are now live
@@ -6593,8 +6600,8 @@ const D = Director;
   });
 
   // nothing in this experience scrolls
-  addEventListener("wheel", e => { e.preventDefault(); }, { passive: false });
-  addEventListener("touchmove", e => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+  addEventListener("wheel", e => { if (e.target.closest && e.target.closest(".copy")) return; e.preventDefault(); }, { passive: false });
+  addEventListener("touchmove", e => { if (e.target.closest && e.target.closest(".copy")) return; if (e.cancelable) e.preventDefault(); }, { passive: false });
 })();
 
 /* ===================== OPENING GATE, AUDIO, REPLAY ===================== */
