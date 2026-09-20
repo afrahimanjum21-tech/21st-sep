@@ -6100,7 +6100,7 @@ SLIDES.forEach((s, i) => {
   const air = s.dark ? "" : `<canvas class="cv air" id="air${i}"></canvas>`;
   const wishCv = s.wish ? `<canvas id="wishCv" class="no-swipe"></canvas>` : "";
   const wishUi = s.wish
-    ? `<div class="wish-ring" id="wishRing"></div><p class="wish-hint" id="wishHint">press and hold the flame</p>`
+    ? `<div class="wish-ring" id="wishRing"></div><p class="wish-hint" id="wishHint"></p>`
     : "";
   el.innerHTML = `<div class="camera">${varySway(s.bg(), i)}${air}</div>${wishCv}
     ${s.scrim ? `<div class="scrim ${s.scrim}"></div>` : ""}
